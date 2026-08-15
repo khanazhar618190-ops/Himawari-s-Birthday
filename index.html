@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Surprise Countdown for Himawari 🎀</title>
+<meta name="description" content="A secret animated birthday surprise made by her brother — counting down every second until Himawari's special day.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   DESIGN TOKENS  (ported from styles-2.css)
+   ================================================================ */
+:root {
+  --cream:     oklch(0.985 0.025 88);
+  --blush:     oklch(0.87 0.075 10);
+  --peach:     oklch(0.9 0.075 55);
+  --lavender:  oklch(0.88 0.06 300);
+  --sunny:     oklch(0.93 0.1 95);
+  --ink:       oklch(0.36 0.07 20);
+  --primary:   oklch(0.74 0.14 5);
+  --primary-fg:oklch(0.99 0.01 90);
+  --muted-fg:  oklch(0.55 0.05 25);
+  --sec-fg:    oklch(0.38 0.08 30);
+
+  --gradient-sky:
+    radial-gradient(120% 90% at 15% 10%, color-mix(in oklab, var(--lavender) 70%, transparent), transparent 60%),
+    radial-gradient(100% 80% at 90% 15%, color-mix(in oklab, var(--peach) 75%, transparent), transparent 62%),
+    radial-gradient(110% 90% at 50% 110%, color-mix(in oklab, var(--blush) 65%, transparent), transparent 65%),
+    linear-gradient(180deg, var(--cream), color-mix(in oklab, var(--sunny) 45%, var(--cream)));
+  --gradient-card:
+    linear-gradient(150deg, color-mix(in oklab, white 82%, var(--cream)), color-mix(in oklab, var(--blush) 22%, white));
+  --gradient-locked:
+    linear-gradient(135deg, color-mix(in oklab, var(--lavender) 60%, white), color-mix(in oklab, var(--blush) 45%, white));
+  --gradient-unlocked:
+    linear-gradient(135deg, oklch(0.78 0.16 12), oklch(0.86 0.14 60), oklch(0.83 0.15 95));
+
+  --shadow-soft: 0 18px 45px -20px color-mix(in oklab, var(--ink) 40%, transparent);
+  --shadow-card: 0 30px 70px -30px color-mix(in oklab, var(--ink) 55%, transparent),
+                 inset 0 1px 0 color-mix(in oklab, white 70%, transparent);
+  --shadow-glow: 0 0 45px color-mix(in oklab, var(--blush) 70%, transparent);
+
+  --font-hand: "Baloo 2", "Comic Sans MS", cursive;
+  --font-body: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--gradient-sky);
+  min-height: 100svh;
+  overflow-x: hidden;
+}
+
+/* paper grain overlay */
+.paper-texture {
+  background-image: radial-gradient(color-mix(in oklab, var(--ink) 8%, transparent) 0.6px, transparent 0.7px);
+  background-size: 4px 4px;
+}
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100svh;
+  width: 100%;
+  padding: 1.5rem 1rem;
+  overflow: hidden;
+}
+
+/* ================================================================
+   AMBIENCE LAYER
+   ================================================================ */
+.ambience { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.blob-1 { width: 18rem; height: 18rem; left: -6rem; top: 2.5rem; background: color-mix(in oklab, var(--lavender) 50%, transparent); animation: floaty 7s ease-in-out infinite; }
+.blob-2 { width: 20rem; height: 20rem; right: -5rem; top: 25%; background: color-mix(in oklab, var(--peach) 50%, transparent); animation: floaty 5s ease-in-out infinite; }
+.blob-3 { width: 18rem; height: 18rem; bottom: 0; left: 33%; background: color-mix(in oklab, var(--blush) 40%, transparent); animation: floaty 7s ease-in-out infinite; }
+
+.cloud {
+  position: absolute;
+  font-size: 4rem;
+  opacity: 0.5;
+  animation: drift 26s linear infinite;
+}
+@media (min-width:768px) { .cloud { font-size: 6rem; } }
+
+.rising-particle {
+  position: absolute;
+  bottom: 0;
+  color: var(--primary);
+  opacity: 0.7;
+  animation: rise 12s linear infinite;
+}
+
+.sparkle-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--primary) 60%, transparent);
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+
+/* ================================================================
+   HEADER
+   ================================================================ */
+.header {
+  position: relative;
+  z-index: 10;
+  margin-top: 0.5rem;
+  text-align: center;
+  animation: pop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.header .tagline {
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  color: var(--muted-fg);
+}
+@media (min-width:640px) { .header .tagline { font-size: 1.125rem; } }
+
+.title-wrap {
+  position: relative;
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+.title-wrap .float-emoji {
+  position: absolute;
+  pointer-events: none;
+}
+.title-wrap .float-emoji.e1 { left: -1.75rem; top: -0.75rem; font-size: 1.25rem; animation: floaty 5s ease-in-out infinite; }
+.title-wrap .float-emoji.e2 { right: -1.5rem; top: 0.25rem; font-size: 1.125rem; animation: floaty 7s ease-in-out infinite; }
+.title-wrap .float-emoji.e3 { right: -2.25rem; bottom: 0; font-size: 1rem; animation: floaty 5s ease-in-out infinite; }
+
+.main-title {
+  font-family: var(--font-hand);
+  font-size: 1.875rem;
+  line-height: 1.2;
+  font-weight: 800;
+  color: var(--ink);
+}
+@media (min-width:640px) { .main-title { font-size: 2.25rem; } }
+@media (min-width:768px) { .main-title { font-size: 3rem; } }
+
+.name-highlight {
+  display: block;
+  background-image: var(--gradient-unlocked);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 1.5em;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.06));
+}
+@media (min-width:640px) { .name-highlight { display: inline; } }
+
+/* ================================================================
+   STAGE (card + characters area)
+   ================================================================ */
+.stage {
+  position: relative;
+  z-index: 10;
+  margin-top: 1rem;
+  display: flex;
+  width: 100%;
+  max-width: 64rem;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Characters — desktop flanking */
+.char-desktop {
+  display: none;
+  position: absolute;
+  bottom: 1rem;
+  pointer-events: none;
+  height: auto;
+  max-height: 30svh;
+  width: 9rem;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
+}
+.char-desktop.left  { left: 0.5rem; animation: floaty 5s ease-in-out infinite; }
+.char-desktop.right { right: 0.5rem; animation: floaty 7s ease-in-out infinite; }
+@media (min-width:1024px) { .char-desktop { display: block; } }
+@media (min-width:1280px) { .char-desktop { width: 11rem; } }
+
+.char-desktop.unlocked-glow {
+  animation: breathe 4s ease-in-out infinite, floaty 5s ease-in-out infinite;
+  border-radius: 9999px;
+}
+
+/* Characters — mobile row */
+.char-mobile-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+}
+@media (min-width:1024px) { .char-mobile-row { display: none; } }
+
+.char-mobile {
+  height: auto;
+  max-height: 22svh;
+  width: 5rem;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.12));
+}
+.char-mobile.left  { animation: floaty 5s ease-in-out infinite; }
+.char-mobile.right { animation: floaty 7s ease-in-out infinite; }
+@media (min-width:640px) { .char-mobile { width: 7rem; } }
+
+/* ================================================================
+   COUNTDOWN CARD
+   ================================================================ */
+.content-col {
+  width: 100%;
+  max-width: 42rem;
+}
+
+.countdown-card {
+  border-radius: 2.25rem;
+  border: 1px solid rgba(255,255,255,0.7);
+  padding: 1.25rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: var(--gradient-card);
+  box-shadow: var(--shadow-card);
+}
+@media (min-width:640px) { .countdown-card { padding: 1.75rem; } }
+
+.card-heading {
+  text-align: center;
+  font-family: var(--font-hand);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--primary);
+}
+@media (min-width:640px) { .card-heading { font-size: 1rem; } }
+
+.timer-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+@media (min-width:640px) { .timer-grid { gap: 0.75rem; } }
+
+.time-block {
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(4px);
+  padding: 0.75rem 0.25rem;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+}
+@media (min-width:640px) { .time-block { padding: 1rem 0.25rem; } }
+
+.time-number {
+  font-family: var(--font-hand);
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+@media (min-width:640px) { .time-number { font-size: 2.25rem; } }
+@media (min-width:768px) { .time-number { font-size: 3rem; } }
+
+.time-label {
+  margin-top: 0.25rem;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--muted-fg);
+}
+@media (min-width:640px) { .time-label { font-size: 0.75rem; } }
+
+/* Mystery message */
+.mystery-row {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+.mystery-row .envelope {
+  font-size: 1.25rem;
+  animation: floaty 5s ease-in-out infinite;
+}
+.mystery-row p {
+  font-family: var(--font-hand);
+  font-size: 0.875rem;
+  color: var(--sec-fg);
+}
+@media (min-width:640px) { .mystery-row p { font-size: 1rem; } }
+
+/* ================================================================
+   SURPRISE BUTTON
+   ================================================================ */
+.btn-zone {
+  position: relative;
+  z-index: 10;
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+.surprise-btn {
+  width: 100%;
+  border: none;
+  border-radius: 9999px;
+  padding: 1rem 1.5rem;
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  cursor: not-allowed;
+  color: var(--muted-fg);
+  background: var(--gradient-locked);
+  opacity: 0.7;
+  filter: saturate(0.5);
+}
+@media (min-width:640px) { .surprise-btn { font-size: 1.125rem; } }
+
+.surprise-btn.unlocked {
+  cursor: pointer;
+  color: var(--primary-fg);
+  background: var(--gradient-unlocked);
+  opacity: 1;
+  filter: none;
+  animation: breathe 4s ease-in-out infinite;
+}
+.surprise-btn.unlocked:hover { transform: scale(1.03); }
+.surprise-btn.unlocked:active { transform: scale(0.95); }
+
+.btn-note {
+  margin-top: 0.5rem;
+  padding-bottom: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-fg);
+}
+@media (min-width:640px) { .btn-note { font-size: 0.875rem; } }
+
+/* ================================================================
+   CONFETTI
+   ================================================================ */
+.confetti-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 20; }
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  animation: confetti-fall var(--dur) linear var(--delay) forwards;
+}
+
+/* ================================================================
+   KEYFRAMES
+   ================================================================ */
+@keyframes floaty {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50%     { transform: translateY(-16px) rotate(1.5deg); }
+}
+@keyframes drift {
+  from { transform: translateX(-25vw); }
+  to   { transform: translateX(125vw); }
+}
+@keyframes rise {
+  0%   { transform: translateY(10vh) scale(0.7) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.9; }
+  90%  { opacity: 0.65; }
+  100% { transform: translateY(-105vh) scale(1.1) rotate(25deg); opacity: 0; }
+}
+@keyframes twinkle {
+  0%,100% { opacity: 0.15; transform: scale(0.7); }
+  50%     { opacity: 1; transform: scale(1.2); }
+}
+@keyframes pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes breathe {
+  0%,100% { box-shadow: var(--shadow-soft); }
+  50%     { box-shadow: var(--shadow-glow), var(--shadow-soft); }
+}
+@keyframes confetti-fall {
+  0%   { transform: translate3d(0, -12vh, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--dx, 0px), 110vh, 0) rotate(720deg); opacity: 0.9; }
+}
+</style>
+</head>
+<body>
+
+<main class="page paper-texture">
+
+  <!-- ==================== AMBIENCE ==================== -->
+  <div class="ambience" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="cloud" style="top:8%;  animation-duration:26s">☁️</div>
+    <div class="cloud" style="top:24%; animation-delay:-9s; animation-duration:34s">☁️</div>
+    <div class="cloud" style="top:40%; animation-delay:-18s; animation-duration:42s">☁️</div>
+    <div id="particleContainer"></div>
+    <div id="sparkleContainer"></div>
+  </div>
+
+  <!-- ==================== CONFETTI (empty until unlock) ==================== -->
+  <div class="confetti-layer" id="confettiLayer"></div>
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="header">
+    <p class="tagline">A little surprise is waiting... ✨</p>
+    <div class="title-wrap">
+      <span class="float-emoji e1">💖</span>
+      <span class="float-emoji e2">💫</span>
+      <span class="float-emoji e3">🎀</span>
+      <h1 class="main-title">
+        For My
+        <span class="name-highlight" id="nameDisplay">Himawari</span>
+        ❤️
+      </h1>
+    </div>
+  </header>
+
+  <!-- ==================== STAGE ==================== -->
+  <section class="stage">
+    <!-- Desktop characters -->
+    <img src="shin-gift.png" alt="Shinchan holding a wrapped pink gift box"
+         class="char-desktop left" id="charLeft" width="768" height="1024">
+    <img src="hima-shiro.png" alt="Himawari standing with Shiro the puppy"
+         class="char-desktop right" width="768" height="1024" loading="lazy">
+
+    <div class="content-col">
+      <!-- Countdown Card -->
+      <div class="countdown-card">
+        <h2 class="card-heading">COUNTDOWN TO YOUR SPECIAL DAY ❤️</h2>
+
+        <div class="timer-grid" id="timerGrid">
+          <div class="time-block">
+            <div class="time-number" id="numDays">--</div>
+            <div class="time-label">DAYS</div>
+          </div>
+          <div class="time-block">
+            <div class="time-number" id="numHours">--</div>
+            <div class="time-label">HOURS</div>
+          </div>
+          <div class="time-block">
+            <div class="time-number" id="numMinutes">--</div>
+            <div class="time-label">MINUTES</div>
+          </div>
+          <div class="time-block">
+            <div class="time-number" id="numSeconds">--</div>
+            <div class="time-label">SECONDS</div>
+          </div>
+        </div>
+
+        <!-- Mystery message -->
+        <div class="mystery-row">
+          <span class="envelope">💌</span>
+          <p>Your Shinchan has prepared something really special for you...</p>
+        </div>
+      </div>
+
+      <!-- Mobile characters -->
+      <div class="char-mobile-row">
+        <img src="shin-gift.png" alt="Shinchan holding a wrapped pink gift box"
+             class="char-mobile left" width="768" height="1024">
+        <img src="hima-shiro.png" alt="Himawari standing with Shiro the puppy"
+             class="char-mobile right" width="768" height="1024" loading="lazy">
+      </div>
+
+      <!-- Button -->
+      <div class="btn-zone">
+        <button class="surprise-btn" id="surpriseBtn" disabled>
+          🔒 WAIT FOR THE SURPRISE...
+        </button>
+        <p class="btn-note" id="btnNote">The surprise will unlock when the countdown ends. ❤️</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ================================================================
+   CONFIG
+   ================================================================ */
+const birthdayDate  = new Date("2026-08-26T00:00:00");
+const NEXT_PAGE_URL = "home.html";
+const MUSIC_URL     = "";
+const HIMAWARI_NAME = "Himawari";
+
+/* ================================================================
+   COUNTDOWN LOGIC
+   ================================================================ */
+const pad = n => String(n).padStart(2, "0");
+
+const els = {
+  days:    document.getElementById("numDays"),
+  hours:   document.getElementById("numHours"),
+  minutes: document.getElementById("numMinutes"),
+  seconds: document.getElementById("numSeconds"),
+};
+const btn     = document.getElementById("surpriseBtn");
+const btnNote = document.getElementById("btnNote");
+const charLeft= document.getElementById("charLeft");
+
+let unlocked = false;
+
+function tick() {
+  const diff = birthdayDate.getTime() - Date.now();
+
+  if (diff <= 0) {
+    els.days.textContent    = "00";
+    els.hours.textContent   = "00";
+    els.minutes.textContent = "00";
+    els.seconds.textContent = "00";
+    if (!unlocked) unlock();
+    return;
+  }
+
+  els.days.textContent    = pad(Math.floor(diff / 86400000));
+  els.hours.textContent   = pad(Math.floor(diff / 3600000) % 24);
+  els.minutes.textContent = pad(Math.floor(diff / 60000) % 60);
+  els.seconds.textContent = pad(Math.floor(diff / 1000) % 60);
+}
+
+tick();
+const timer = setInterval(tick, 1000);
+
+/* ================================================================
+   UNLOCK
+   ================================================================ */
+function unlock() {
+  unlocked = true;
+  clearInterval(timer);
+  btn.disabled = false;
+  btn.classList.add("unlocked");
+  btn.textContent = "🎁 OPEN YOUR SURPRISE";
+  btnNote.textContent = "It's time! Tap to open your surprise. ❤️";
+  if (charLeft) charLeft.classList.add("unlocked-glow");
+  spawnConfetti();
+}
+
+btn.addEventListener("click", () => {
+  if (!unlocked) return;
+  spawnConfetti();
+  if (MUSIC_URL) { try { new Audio(MUSIC_URL).play(); } catch(e){} }
+  btn.style.transform = "scale(0.95)";
+  setTimeout(() => { window.location.href = NEXT_PAGE_URL; }, 900);
+});
+
+/* ================================================================
+   AMBIENT PARTICLES
+   ================================================================ */
+const particleBox  = document.getElementById("particleContainer");
+const sparkleBox   = document.getElementById("sparkleContainer");
+const glyphs       = ["❤","💗","✿","★","✦"];
+
+/* deterministic-ish random */
+function srand(seed, min, max) {
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return Math.round((min + (x - Math.floor(x)) * (max - min)) * 100) / 100;
+}
+
+/* rising hearts */
+for (let i = 0; i < 14; i++) {
+  const sp = document.createElement("span");
+  sp.className = "rising-particle";
+  sp.textContent = glyphs[i % 5];
+  sp.style.left  = srand(i + 1, 2, 96) + "%";
+  sp.style.fontSize = srand(i + 120, 12, 26) + "px";
+  sp.style.animationDelay    = srand(i + 40, 0, 12) + "s";
+  sp.style.animationDuration = srand(i + 80, 10, 18) + "s";
+  particleBox.appendChild(sp);
+}
+
+/* sparkle dots */
+for (let i = 0; i < 26; i++) {
+  const sp = document.createElement("span");
+  sp.className = "sparkle-dot";
+  const sz = srand(i + 380, 3, 8);
+  sp.style.left   = srand(i + 200, 1, 99) + "%";
+  sp.style.top    = srand(i + 260, 2, 96) + "%";
+  sp.style.width  = sz + "px";
+  sp.style.height = sz + "px";
+  sp.style.animationDelay = srand(i + 320, 0, 3) + "s";
+  sparkleBox.appendChild(sp);
+}
+
+/* ================================================================
+   CONFETTI
+   ================================================================ */
+let burstCount = 0;
+function spawnConfetti() {
+  burstCount++;
+  const layer = document.getElementById("confettiLayer");
+  const hues  = ["var(--blush)","var(--peach)","var(--lavender)","var(--sunny)","var(--primary)"];
+
+  for (let i = 0; i < 90; i++) {
+    const el  = document.createElement("span");
+    el.className = "confetti-piece";
+    const left  = srand(i + burstCount * 7 + 3, 0, 100);
+    const dx    = srand(i + burstCount * 11 + 9, -140, 140);
+    const delay = srand(i + burstCount * 13 + 17, 0, 1.4);
+    const dur   = srand(i + burstCount * 17 + 23, 2.6, 5.2);
+    const size  = srand(i + burstCount * 19 + 31, 6, 13);
+    const round = i % 3 === 0;
+
+    el.style.left       = left + "%";
+    el.style.width      = size + "px";
+    el.style.height     = (size * (round ? 1 : 1.7)) + "px";
+    el.style.background = hues[i % 5];
+    el.style.borderRadius = round ? "999px" : "2px";
+    el.style.setProperty("--dx", dx + "px");
+    el.style.setProperty("--dur", dur + "s");
+    el.style.setProperty("--delay", delay + "s");
+    el.style.animationDuration = dur + "s";
+    el.style.animationDelay    = delay + "s";
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), (dur + delay) * 1000 + 200);
+  }
+}
+</script>
+</body>
+</html>
